@@ -1,0 +1,71 @@
+name: sprawdzeni-fachowcy
+
+services:
+  db:
+    image: postgres:18.6-bookworm
+
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    volumes:
+      - postgres_data:/var/lib/postgresql
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+    restart: unless-stopped
+
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    restart: unless-stopped
+
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+
+    depends_on:
+      - api
+
+    restart: unless-stopped
+
+
+  searxng:
+    image: docker.io/searxng/searxng:latest
+
+    environment:
+      SEARXNG_SECRET: ${SEARXNG_SECRET}
+
+    volumes:
+      - ./infra/searxng/settings.yml:/etc/searxng/settings.yml:ro
+      - searxng_cache:/var/cache/searxng
+
+    expose:
+      - "8080"
+
+    restart: unless-stopped
+
+
+volumes:
+  postgres_data:
+  searxng_cache:

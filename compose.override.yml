@@ -1,0 +1,30 @@
+services:
+  api:
+    ports:
+      - "8001:8000"
+
+    volumes:
+      - ./backend/alembic:/app/alembic
+
+    command:
+      - uv
+      - run
+      - fastapi
+      - dev
+      - src/app/main.py
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+
+    develop:
+      watch:
+        - action: sync
+          path: ./backend/src
+          target: /app/src
+
+        - action: rebuild
+          path: ./backend/pyproject.toml
+
+        - action: rebuild
+          path: ./backend/uv.lock

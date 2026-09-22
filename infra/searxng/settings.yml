@@ -1,8 +1,9 @@
 use_default_settings:
   engines:
     keep_only:
+      - brave
+      - duckduckgo
       - bing
-      - google cse
 
 general:
   debug: false
@@ -10,6 +11,7 @@ general:
 
 search:
   safe_search: 1
+  default_lang: "pl-PL"
   autocomplete: ""
   formats:
     - html
@@ -20,11 +22,15 @@ server:
   image_proxy: false
 
 engines:
-  - name: bing
+  - name: brave
     disabled: false
 
-  - name: google cse
+  - name: duckduckgo
     disabled: false
+
+  - name: bing
+    disabled: false
+    language: "pl-PL"
 
 outgoing:
   request_timeout: 5.0
